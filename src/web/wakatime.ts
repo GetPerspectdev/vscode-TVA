@@ -77,35 +77,27 @@ export class WakaTime {
   public initializeDependencies(): void {
     this.logger.debug(`Initializing Perspect v${this.extension.version}`);
 
-<<<<<<< HEAD
-    this.statusBar = vscode.window.createStatusBarItem("com.perspect.statusbar", vscode.StatusBarAlignment.Left, 3);
-    this.statusBar.command = COMMAND_DASHBOARD;
-
-    this.statusBarTeamYou = vscode.window.createStatusBarItem("com.perspect.teamyou", vscode.StatusBarAlignment.Left, 2);
-    this.statusBarTeamOther = vscode.window.createStatusBarItem("com.perspect.teamother", vscode.StatusBarAlignment.Left, 1);
-=======
     this.statusBar = vscode.window.createStatusBarItem(
-      'com.wakatime.statusbar',
+      'com.perspect.statusbar',
       vscode.StatusBarAlignment.Left,
       3,
     );
-    this.statusBar.name = 'WakaTime';
+    this.statusBar.name = 'Perspect';
     this.statusBar.command = COMMAND_DASHBOARD;
 
     this.statusBarTeamYou = vscode.window.createStatusBarItem(
-      'com.wakatime.teamyou',
+      'com.perspect.teamyou',
       vscode.StatusBarAlignment.Left,
       2,
     );
-    this.statusBarTeamYou.name = 'WakaTime Top dev';
+    this.statusBarTeamYou.name = 'Perspect Top dev';
 
     this.statusBarTeamOther = vscode.window.createStatusBarItem(
-      'com.wakatime.teamother',
+      'com.perspect.teamother',
       vscode.StatusBarAlignment.Left,
       1,
     );
-    this.statusBarTeamOther.name = 'WakaTime Team Total';
->>>>>>> e0a7f36c785c35007c98897ba4b018bcb30212c3
+    this.statusBarTeamOther.name = 'Perspect Team Total';
 
     const showStatusBar = this.config.get('perspect.status_bar_enabled');
     this.showStatusBar = showStatusBar !== 'false';
