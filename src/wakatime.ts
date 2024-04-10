@@ -80,7 +80,7 @@ export class WakaTime {
 
         this.dependencies = new Dependencies(this.options, this.logger, this.resourcesLocation);
 
-        let extension = vscode.extensions.getExtension('WakaTime.vscode-wakatime');
+        let extension = vscode.extensions.getExtension('Perspect.vscode-perspect');
         this.extension = (extension != undefined && extension.packageJSON) || { version: '0.0.0' };
         this.agentName = this.appNames[vscode.env.appName] || 'vscode';
 
@@ -117,22 +117,22 @@ export class WakaTime {
   }
 
   public initializeDependencies(): void {
-    this.logger.debug(`Initializing WakaTime v${this.extension.version}`);
+    this.logger.debug(`Initializing Perspect v${this.extension.version}`);
 
     this.statusBar = vscode.window.createStatusBarItem(
-      'com.wakatime.statusbar',
+      'com.perspect.statusbar',
       vscode.StatusBarAlignment.Left,
       3,
     );
     this.statusBar.command = COMMAND_DASHBOARD;
 
     this.statusBarTeamYou = vscode.window.createStatusBarItem(
-      'com.wakatime.teamyou',
+      'com.perspect.teamyou',
       vscode.StatusBarAlignment.Left,
       2,
     );
     this.statusBarTeamOther = vscode.window.createStatusBarItem(
-      'com.wakatime.teamother',
+      'com.perspect.teamother',
       vscode.StatusBarAlignment.Left,
       1,
     );
@@ -146,7 +146,7 @@ export class WakaTime {
         (statusBarEnabled: Setting) => {
           this.showStatusBar = statusBarEnabled.value !== 'false';
           this.setStatusBarVisibility(this.showStatusBar);
-          this.updateStatusBarText('WakaTime Initializing...');
+          this.updateStatusBarText('Perspect Initializing...');
 
           this.checkApiKey();
 
@@ -160,9 +160,9 @@ export class WakaTime {
               this.showCodingActivity = showCodingActivity.value !== 'false';
 
               this.dependencies.checkAndInstallCli(() => {
-                this.logger.debug('WakaTime initialized');
+                this.logger.debug('Perspect initialized');
                 this.updateStatusBarText();
-                this.updateStatusBarTooltip('WakaTime: Initialized');
+                this.updateStatusBarTooltip('Perspect: Initialized');
                 this.getCodingActivity();
               });
             },
@@ -224,8 +224,8 @@ export class WakaTime {
     this.options.getApiKey((defaultVal: string | null) => {
       if (Utils.apiKeyInvalid(defaultVal ?? undefined)) defaultVal = '';
       let promptOptions = {
-        prompt: 'WakaTime Api Key',
-        placeHolder: 'Enter your api key from https://wakatime.com/api-key',
+        prompt: 'Perspect Api Key',
+        placeHolder: 'Enter your api key from https://app.perspect.xyz/account',
         value: defaultVal!,
         ignoreFocusOut: true,
         password: hidden,
@@ -236,8 +236,9 @@ export class WakaTime {
           let invalid = Utils.apiKeyInvalid(val);
           if (!invalid) {
             this.options.setSetting('settings', 'api_key', val, false);
+            this.options.setSetting('settings', 'api_url', 'https://loom.getperspect.dev/api/v1', false);
           } else vscode.window.setStatusBarMessage(invalid);
-        } else vscode.window.setStatusBarMessage('WakaTime api key not provided');
+        } else vscode.window.setStatusBarMessage('Perspect api key not provided');
       });
     });
   }
@@ -247,7 +248,7 @@ export class WakaTime {
       let defaultVal = proxy.value;
       if (!defaultVal) defaultVal = '';
       let promptOptions = {
-        prompt: 'WakaTime Proxy',
+        prompt: 'Perspect Proxy',
         placeHolder: `Proxy format is https://user:pass@host:port (current value \"${defaultVal}\")`,
         value: defaultVal,
         ignoreFocusOut: true,
@@ -358,7 +359,7 @@ export class WakaTime {
   }
 
   public openDashboardWebsite(): void {
-    let url = 'https://wakatime.com/';
+    let url = 'https://app.perspect.xyz/';
     vscode.env.openExternal(vscode.Uri.parse(url));
   }
 
@@ -535,7 +536,7 @@ export class WakaTime {
     args.push('--entity', Utils.quote(file));
 
     let user_agent =
-      this.agentName + '/' + vscode.version + ' vscode-wakatime/' + this.extension.version;
+      this.agentName + '/' + vscode.version + ' vscode-perspect/' + this.extension.version;
     args.push('--plugin', Utils.quote(user_agent));
 
     args.push('--lineno', String(selection.line + 1));
@@ -593,7 +594,7 @@ export class WakaTime {
         if (this.showStatusBar) {
           if (!this.showCodingActivity) this.updateStatusBarText();
           this.updateStatusBarTooltip(
-            'WakaTime: working offline... coding activity will sync next time we are online',
+            'Perspect: working offline... coding activity will sync next time we are online',
           );
         }
         this.logger.warn(
@@ -602,15 +603,15 @@ export class WakaTime {
       } else if (code == 103) {
         let error_msg = `Config parsing error (103); Check your ${this.options.getLogFile()} file for more details`;
         if (this.showStatusBar) {
-          this.updateStatusBarText('WakaTime Error');
-          this.updateStatusBarTooltip(`WakaTime: ${error_msg}`);
+          this.updateStatusBarText('Perspect Error');
+          this.updateStatusBarTooltip(`Perspect: ${error_msg}`);
         }
         this.logger.error(error_msg);
       } else if (code == 104) {
         let error_msg = 'Invalid Api Key (104); Make sure your Api Key is correct!';
         if (this.showStatusBar) {
-          this.updateStatusBarText('WakaTime Error');
-          this.updateStatusBarTooltip(`WakaTime: ${error_msg}`);
+          this.updateStatusBarText('Perspect Error');
+          this.updateStatusBarTooltip(`Perspect: ${error_msg}`);
         }
         this.logger.error(error_msg);
         let now: number = Date.now();
@@ -622,8 +623,8 @@ export class WakaTime {
       } else {
         let error_msg = `Unknown Error (${code}); Check your ${this.options.getLogFile()} file for more details`;
         if (this.showStatusBar) {
-          this.updateStatusBarText('WakaTime Error');
-          this.updateStatusBarTooltip(`WakaTime: ${error_msg}`);
+          this.updateStatusBarText('Perspect Error');
+          this.updateStatusBarTooltip(`Perspect: ${error_msg}`);
         }
         this.logger.error(error_msg);
       }
@@ -648,7 +649,7 @@ export class WakaTime {
     if (!this.dependencies.isCliInstalled()) return;
 
     let user_agent =
-      this.agentName + '/' + vscode.version + ' vscode-wakatime/' + this.extension.version;
+      this.agentName + '/' + vscode.version + ' vscode-perspect/' + this.extension.version;
     let args = ['--today', '--output', 'json', '--plugin', Utils.quote(user_agent)];
 
     if (this.isMetricsEnabled) args.push('--metrics');
@@ -705,7 +706,7 @@ export class WakaTime {
                 if (this.showCodingActivity) {
                   this.updateStatusBarText(jsonData.text.trim());
                   this.updateStatusBarTooltip(
-                    'WakaTime: Today’s coding time. Click to visit dashboard.',
+                    'Perspect: Today’s coding time. Click to visit dashboard.',
                   );
                 } else {
                   this.updateStatusBarText();
@@ -714,14 +715,14 @@ export class WakaTime {
               } else {
                 this.updateStatusBarText();
                 this.updateStatusBarTooltip(
-                  'WakaTime: Calculating time spent today in background...',
+                  'Perspect: Calculating time spent today in background...',
                 );
               }
               this.updateTeamStatusBar();
             } else {
               this.updateStatusBarText();
               this.updateStatusBarTooltip(
-                'WakaTime: Calculating time spent today in background...',
+                'Perspect: Calculating time spent today in background...',
               );
             }
           }
@@ -764,7 +765,7 @@ export class WakaTime {
     }
 
     let user_agent =
-      this.agentName + '/' + vscode.version + ' vscode-wakatime/' + this.extension.version;
+      this.agentName + '/' + vscode.version + ' vscode-perspect/' + this.extension.version;
     let args = ['--output', 'json', '--plugin', Utils.quote(user_agent)];
 
     args.push('--file-experts', Utils.quote(file));

@@ -49,15 +49,15 @@ export class WakaTime {
   }
 
   public initialize(): void {
-    if (this.config.get('wakatime.debug') == 'true') {
+    if (this.config.get('perspect.debug') == 'true') {
       this.logger.setLevel(LogLevel.DEBUG);
     }
 
-    let extension = vscode.extensions.getExtension('WakaTime.vscode-wakatime');
+    let extension = vscode.extensions.getExtension('Perspect.vscode-perspect');
     this.extension = (extension != undefined && extension.packageJSON) || { version: '0.0.0' };
     this.agentName = 'vscode';
 
-    this.disabled = this.config.get('wakatime.disabled') === 'true';
+    this.disabled = this.config.get('perspect.disabled') === 'true';
     if (this.disabled) {
       this.dispose();
       return;
@@ -74,34 +74,34 @@ export class WakaTime {
   }
 
   public initializeDependencies(): void {
-    this.logger.debug(`Initializing WakaTime v${this.extension.version}`);
+    this.logger.debug(`Initializing Perspect v${this.extension.version}`);
 
-    this.statusBar = vscode.window.createStatusBarItem("com.wakatime.statusbar", vscode.StatusBarAlignment.Left, 3);
+    this.statusBar = vscode.window.createStatusBarItem("com.perspect.statusbar", vscode.StatusBarAlignment.Left, 3);
     this.statusBar.command = COMMAND_DASHBOARD;
 
-    this.statusBarTeamYou = vscode.window.createStatusBarItem("com.wakatime.teamyou", vscode.StatusBarAlignment.Left, 2);
-    this.statusBarTeamOther = vscode.window.createStatusBarItem("com.wakatime.teamother", vscode.StatusBarAlignment.Left, 1);
+    this.statusBarTeamYou = vscode.window.createStatusBarItem("com.perspect.teamyou", vscode.StatusBarAlignment.Left, 2);
+    this.statusBarTeamOther = vscode.window.createStatusBarItem("com.perspect.teamother", vscode.StatusBarAlignment.Left, 1);
 
-    const showStatusBar = this.config.get('wakatime.status_bar_enabled');
+    const showStatusBar = this.config.get('perspect.status_bar_enabled');
     this.showStatusBar = showStatusBar !== 'false';
 
-    const showStatusBarTeam = this.config.get('wakatime.status_bar_team');
+    const showStatusBarTeam = this.config.get('perspect.status_bar_team');
     this.showStatusBarTeam = showStatusBarTeam !== 'false';
 
     this.setStatusBarVisibility(this.showStatusBar);
-    this.updateStatusBarText('WakaTime Initializing...');
+    this.updateStatusBarText('Perspect Initializing...');
 
     this.checkApiKey();
 
     this.setupEventListeners();
 
-    this.logger.debug('WakaTime initialized.');
+    this.logger.debug('Perspect initialized.');
 
-    const showCodingActivity = this.config.get('wakatime.status_bar_coding_activity');
+    const showCodingActivity = this.config.get('perspect.status_bar_coding_activity');
     this.showCodingActivity = showCodingActivity !== 'false';
 
     this.updateStatusBarText();
-    this.updateStatusBarTooltip('WakaTime: Initialized');
+    this.updateStatusBarTooltip('Perspect: Initialized');
     this.getCodingActivity();
   }
 
@@ -153,11 +153,11 @@ export class WakaTime {
   }
 
   public promptForApiKey(hidden: boolean = true): void {
-    let defaultVal: string = this.config.get('wakatime.apiKey') || '';
+    let defaultVal: string = this.config.get('perspect.apiKey') || '';
     if (Utils.apiKeyInvalid(defaultVal)) defaultVal = '';
     let promptOptions = {
-      prompt: 'WakaTime Api Key',
-      placeHolder: 'Enter your api key from https://wakatime.com/api-key',
+      prompt: 'Perspect Api Key',
+      placeHolder: 'Enter your api key from https://app.perspect.xyz/account',
       value: defaultVal,
       ignoreFocusOut: true,
       password: hidden,
@@ -166,14 +166,14 @@ export class WakaTime {
     vscode.window.showInputBox(promptOptions).then((val) => {
       if (val != undefined) {
         let invalid = Utils.apiKeyInvalid(val);
-        if (!invalid) this.config.update('wakatime.apiKey', val);
+        if (!invalid) this.config.update('perspect.apiKey', val);
         else vscode.window.setStatusBarMessage(invalid);
-      } else vscode.window.setStatusBarMessage('WakaTime api key not provided');
+      } else vscode.window.setStatusBarMessage('perspect api key not provided');
     });
   }
 
   public promptForDebug(): void {
-    let defaultVal: string = this.config.get('wakatime.debug') || '';
+    let defaultVal: string = this.config.get('perspect.debug') || '';
     if (!defaultVal || defaultVal !== 'true') defaultVal = 'false';
     let items: string[] = ['true', 'false'];
     let promptOptions = {
@@ -183,7 +183,7 @@ export class WakaTime {
     };
     vscode.window.showQuickPick(items, promptOptions).then((newVal) => {
       if (newVal == null) return;
-      this.config.update('wakatime.debug', newVal);
+      this.config.update('perspect.debug', newVal);
       if (newVal === 'true') {
         this.logger.setLevel(LogLevel.DEBUG);
         this.logger.debug('Debug enabled');
@@ -195,7 +195,7 @@ export class WakaTime {
 
   public promptToDisable(): void {
     const previousValue = this.disabled;
-    let currentVal = this.config.get('wakatime.disabled');
+    let currentVal = this.config.get('perspect.disabled');
     if (!currentVal || currentVal !== 'true') currentVal = 'false';
     let items: string[] = ['disable', 'enable'];
     const helperText = currentVal === 'true' ? 'disabled' : 'enabled';
@@ -208,11 +208,11 @@ export class WakaTime {
       this.disabled = newVal === 'disable';
       if (this.disabled != previousValue) {
         if (this.disabled) {
-          this.config.update('wakatime.disabled', 'true');
+          this.config.update('perspect.disabled', 'true');
           this.logger.debug('Extension disabled, will not report code stats to dashboard');
           this.dispose();
         } else {
-          this.config.update('wakatime.disabled', 'false');
+          this.config.update('perspect.disabled', 'false');
           this.initializeDependencies();
         }
       }
@@ -220,7 +220,7 @@ export class WakaTime {
   }
 
   public promptStatusBarIcon(): void {
-    let defaultVal: string = this.config.get('wakatime.status_bar_enabled') || '';
+    let defaultVal: string = this.config.get('perspect.status_bar_enabled') || '';
     if (!defaultVal || defaultVal !== 'false') defaultVal = 'true';
     let items: string[] = ['true', 'false'];
     let promptOptions = {
@@ -230,14 +230,14 @@ export class WakaTime {
     };
     vscode.window.showQuickPick(items, promptOptions).then((newVal) => {
       if (newVal !== 'true' && newVal !== 'false') return;
-      this.config.update('wakatime.status_bar_enabled', newVal);
+      this.config.update('perspect.status_bar_enabled', newVal);
       this.showStatusBar = newVal === 'true'; // cache setting to prevent reading from disc too often
       this.setStatusBarVisibility(this.showStatusBar);
     });
   }
 
   public promptStatusBarCodingActivity(): void {
-    let defaultVal: string = this.config.get('wakatime.status_bar_coding_activity') || '';
+    let defaultVal: string = this.config.get('perspect.status_bar_coding_activity') || '';
     if (!defaultVal || defaultVal !== 'false') defaultVal = 'true';
     let items: string[] = ['true', 'false'];
     let promptOptions = {
@@ -247,7 +247,7 @@ export class WakaTime {
     };
     vscode.window.showQuickPick(items, promptOptions).then((newVal) => {
       if (newVal !== 'true' && newVal !== 'false') return;
-      this.config.update('wakatime.status_bar_coding_activity', newVal);
+      this.config.update('perspect.status_bar_coding_activity', newVal);
       if (newVal === 'true') {
         this.logger.debug('Coding activity in status bar has been enabled');
         this.showCodingActivity = true;
@@ -263,7 +263,7 @@ export class WakaTime {
   }
 
   public openDashboardWebsite(): void {
-    let url = 'https://wakatime.com/';
+    let url = 'https://app.perspect.xyz/';
     vscode.env.openExternal(vscode.Uri.parse(url));
   }
 
@@ -274,7 +274,7 @@ export class WakaTime {
   }
 
   private hasApiKey(callback: (arg0: boolean) => void): void {
-    const apiKey: string = this.config.get('wakatime.apiKey') || '';
+    const apiKey: string = this.config.get('perspect.apiKey') || '';
     callback(!Utils.apiKeyInvalid(apiKey));
   }
 
@@ -455,8 +455,8 @@ export class WakaTime {
 
     this.logger.debug(`Sending heartbeat: ${JSON.stringify(payload)}`);
 
-    const apiKey = this.config.get('wakatime.apiKey');
-    const url = `https://api.wakatime.com/api/v1/users/current/heartbeats?api_key=${apiKey}`;
+    const apiKey = this.config.get('perspect.apiKey');
+    const url = `https://loom.getperspect.dev/api/v1/users/current/heartbeats?api_key=${apiKey}`;
 
     try {
       const response = await fetch(url, {
@@ -473,10 +473,10 @@ export class WakaTime {
       } else {
         this.logger.warn(`API Error ${response.status}: ${parsedJSON}`);
         if (response && response.status == 401) {
-          let error_msg = 'Invalid WakaTime Api Key';
+          let error_msg = 'Invalid Perspect Api Key';
           if (this.showStatusBar) {
-            this.updateStatusBarText('WakaTime Error');
-            this.updateStatusBarTooltip(`WakaTime: ${error_msg}`);
+            this.updateStatusBarText('Perspect Error');
+            this.updateStatusBarTooltip(`Perspect: ${error_msg}`);
           }
           this.logger.error(error_msg);
           let now: number = Date.now();
@@ -487,8 +487,8 @@ export class WakaTime {
         } else {
           let error_msg = `Error sending heartbeat (${response.status}); Check your browser console for more details.`;
           if (this.showStatusBar) {
-            this.updateStatusBarText('WakaTime Error');
-            this.updateStatusBarTooltip(`WakaTime: ${error_msg}`);
+            this.updateStatusBarText('Perspect Error');
+            this.updateStatusBarTooltip(`Perspect: ${error_msg}`);
           }
           this.logger.error(error_msg);
         }
@@ -497,8 +497,8 @@ export class WakaTime {
       this.logger.warn(`API Error: ${ex}`);
       let error_msg = `Error sending heartbeat; Check your browser console for more details.`;
       if (this.showStatusBar) {
-        this.updateStatusBarText('WakaTime Error');
-        this.updateStatusBarTooltip(`WakaTime: ${error_msg}`);
+        this.updateStatusBarText('Perspect Error');
+        this.updateStatusBarTooltip(`Perspect: ${error_msg}`);
       }
       this.logger.error(error_msg);
     }
@@ -520,25 +520,25 @@ export class WakaTime {
 
   private async _getCodingActivity() {
     this.logger.debug('Fetching coding activity for Today from api.');
-    const apiKey = this.config.get('wakatime.apiKey');
-    const url = `https://api.wakatime.com/api/v1/users/current/statusbar/today?api_key=${apiKey}`;
+    const apiKey = this.config.get('perspect.apiKey');
+    const url = `https://loom.getperspect.dev/api/v1/users/current/statusbar/today?api_key=${apiKey}`;
     try {
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'User-Agent':
-            this.agentName + '/' + vscode.version + ' vscode-wakatime/' + this.extension.version,
+            this.agentName + '/' + vscode.version + ' vscode-perspect/' + this.extension.version,
         },
       });
       const parsedJSON = await response.json();
       if (response.status == 200) {
-        this.config.get('wakatime.status_bar_coding_activity');
+        this.config.get('perspect.status_bar_coding_activity');
         if (this.showStatusBar) {
           if (parsedJSON.data) this.hasTeamFeatures = parsedJSON.data.has_team_features;
           let output = parsedJSON.data.grand_total.text;
           if (
-            this.config.get('wakatime.status_bar_hide_categories') != 'true' &&
+            this.config.get('perspect.status_bar_hide_categories') != 'true' &&
             parsedJSON.data.categories.length > 1
           ) {
             output = parsedJSON.data.categories.map((x) => x.text + ' ' + x.name).join(', ');
@@ -547,7 +547,7 @@ export class WakaTime {
             if (this.showCodingActivity) {
               this.updateStatusBarText(output.trim());
               this.updateStatusBarTooltip(
-                'WakaTime: Today’s coding time. Click to visit dashboard.',
+                'Perspect: Today’s coding time. Click to visit dashboard.',
               );
             } else {
               this.updateStatusBarText();
@@ -555,17 +555,17 @@ export class WakaTime {
             }
           } else {
             this.updateStatusBarText();
-            this.updateStatusBarTooltip('WakaTime: Calculating time spent today in background...');
+            this.updateStatusBarTooltip('Perspect: Calculating time spent today in background...');
           }
           this.updateTeamStatusBar();
         }
       } else {
         this.logger.warn(`API Error ${response.status}: ${parsedJSON}`);
         if (response && response.status == 401) {
-          let error_msg = 'Invalid WakaTime Api Key';
+          let error_msg = 'Invalid Perspect Api Key';
           if (this.showStatusBar) {
-            this.updateStatusBarText('WakaTime Error');
-            this.updateStatusBarTooltip(`WakaTime: ${error_msg}`);
+            this.updateStatusBarText('Perspect Error');
+            this.updateStatusBarTooltip(`Perspect: ${error_msg}`);
           }
           this.logger.error(error_msg);
         } else {
@@ -602,12 +602,12 @@ export class WakaTime {
     }
 
     this.logger.debug('Fetching devs for currently focused file from api.');
-    const apiKey = this.config.get('wakatime.apiKey');
-    const url = `https://api.wakatime.com/api/v1/users/current/file_experts?api_key=${apiKey}`;
+    const apiKey = this.config.get('perspect.apiKey');
+    const url = `https://loom.getperspect.dev/api/v1/users/current/file_experts?api_key=${apiKey}`;
 
     const payload = {
       entity: file,
-      plugin: this.agentName + '/' + vscode.version + ' vscode-wakatime/' + this.extension.version,
+      plugin: this.agentName + '/' + vscode.version + ' vscode-perspect/' + this.extension.version,
     };
 
     const project = this.getProjectName();
@@ -624,7 +624,7 @@ export class WakaTime {
         headers: {
           'Content-Type': 'application/json',
           'User-Agent':
-            this.agentName + '/' + vscode.version + ' vscode-wakatime/' + this.extension.version,
+            this.agentName + '/' + vscode.version + ' vscode-perspect/' + this.extension.version,
         },
         body: JSON.stringify(payload),
       });
@@ -653,7 +653,7 @@ export class WakaTime {
         // make sure this file is still the currently focused file
         if (file !== this.currentlyFocusedFile) return;
 
-        this.config.get('wakatime.status_bar_coding_activity');
+        this.config.get('perspect.status_bar_coding_activity');
         if (this.showStatusBar) {
           this.updateTeamStatusBarFromJson(devs);
         }
@@ -662,7 +662,7 @@ export class WakaTime {
         this.updateTeamStatusBarTextForOther();
         this.logger.warn(`API Error ${response.status}: ${parsedJSON}`);
         if (response && response.status == 401) {
-          this.logger.error('Invalid WakaTime Api Key');
+          this.logger.error('Invalid Perspect Api Key');
         } else {
           let error_msg = `Error fetching devs for currently focused file (${response.status}); Check your browser console for more details.`;
           this.logger.debug(error_msg);
@@ -745,7 +745,7 @@ export class WakaTime {
   }
 
   private getPlugin(): string {
-    const agent = `${this.agentName}/${vscode.version} vscode-wakatime/${this.extension.version}`;
+    const agent = `${this.agentName}/${vscode.version} vscode-perspect/${this.extension.version}`;
     const os = this.getOperatingSystem();
     if (os) return `(${os}) ${agent}`;
     return agent;

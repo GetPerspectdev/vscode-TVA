@@ -304,7 +304,7 @@ export class Options {
   public getApiUrlFromEnv(): string {
     if (this.cache.api_url_from_env !== undefined) return this.cache.api_url_from_env;
 
-    this.cache.api_url_from_env = process.env.WAKATIME_API_URL || '';
+    this.cache.api_url_from_env = process.env.PERSPECT_API_URL || '';
 
     return this.cache.api_url_from_env;
   }
