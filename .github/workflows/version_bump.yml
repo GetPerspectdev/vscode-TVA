@@ -5,7 +5,7 @@ on:
     branches:
       - release
     types:
-      - synchronize
+      - opened
       - edited
       - ready_for_review
       - labeled
