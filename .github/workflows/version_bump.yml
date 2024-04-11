@@ -1,0 +1,26 @@
+name: 'Bump Version'
+
+on:
+  pull_request_target:
+    branches:
+      - release
+    types:
+      - synchronize
+      - edited
+      - ready_for_review
+      - labeled
+      - reopened
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.10.0
+        with:
+          access_token: ${{ secrets.REPO_TOKEN }}
+      - uses: 'actions/checkout@v3'
+      - name: Pull Request Version Bump
+        uses: fadi-quader-mox/pr-version-bump@v1.0.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
