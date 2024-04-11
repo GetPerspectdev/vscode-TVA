@@ -2,7 +2,7 @@
   "name": "vscode-perspect",
   "displayName": "Perspect",
   "description": "Metrics, insights, and time tracking automatically generated from your programming activity.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "Perspect",
   "author": {
     "name": "Perspect"

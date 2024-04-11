@@ -155,6 +155,8 @@ export class WakaTime {
 
           this.checkApiKey();
 
+
+
           this.setupEventListeners();
 
           this.options.getSetting(
@@ -240,8 +242,17 @@ export class WakaTime {
         if (val != undefined) {
           let invalid = Utils.apiKeyInvalid(val);
           if (!invalid) {
-            this.options.setSetting('settings', 'api_key', val, false);
-            this.options.setSetting('settings', 'api_url', 'https://loom.getperspect.dev/api/v1', false);
+            const settings: Setting[] = [
+              {
+                key: 'api_key',
+                value: val,
+              },
+              {
+                key: 'api_url',
+                value: 'https://loom.getperspect.dev/api/v1',
+              },
+            ]
+            this.options.setSettings('settings', settings, false);
           } else vscode.window.setStatusBarMessage(invalid);
         } else vscode.window.setStatusBarMessage('Perspect api key not provided');
       });
