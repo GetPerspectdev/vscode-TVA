@@ -1,26 +1,19 @@
-name: 'Bump Version'
+name: Version Increment
 
 on:
-  pull_request_target:
+  push:
     branches:
-      - release
-    types:
-      - opened
-      - edited
-      - ready_for_review
-      - labeled
-      - reopened
+      - main
 
 jobs:
-  test:
+  version:
     runs-on: ubuntu-latest
+    if: "!startsWith(github.event.head_commit.message, '[RELEASE]')"
     steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.10.0
+      - uses: actions/checkout@v2
         with:
-          access_token: ${{ secrets.REPO_TOKEN }}
-      - uses: 'actions/checkout@v3'
-      - name: Pull Request Version Bump
-        uses: fadi-quader-mox/pr-version-bump@v1.0.0
-        with:
-          GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+          token: ${{ secrets.REPO_TOKEN }}
+      - run: git config --global user.name 'GetPerspect.Dev'
+      - run: git config --global user.email 'dev@perspect.xyz'
+      - run: npm version patch -m "[RELEASE] %s"
+      - run: git push
